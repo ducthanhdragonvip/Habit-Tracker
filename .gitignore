@@ -66,3 +66,5 @@ coverage.*
 htmlcov/
 pip-wheel-metadata/
 __pycache__/
+.vercel
+.env*.local
