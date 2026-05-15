@@ -109,3 +109,5 @@ Push to `main` triggers GitHub Actions:
 
 - **Backend** → tested with SQLite, then deployed to Railway (requires `RAILWAY_TOKEN` secret)
 - **Frontend** → built with Vite, then deployed to Vercel (requires `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` secrets and `VITE_API_BASE_URL` set in Vercel)
+
+--
