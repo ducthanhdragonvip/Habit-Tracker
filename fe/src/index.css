@@ -1,0 +1,53 @@
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-bg text-ink font-mono antialiased;
+  }
+  *:focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-bg;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-surface rounded-card border-2 border-border shadow-bold;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-btn px-4 py-2.5 font-semibold transition-transform active:translate-y-0.5;
+  }
+  .btn-primary {
+    @apply btn bg-primary text-white hover:bg-primary-hover shadow-bold-sm;
+  }
+  .btn-secondary {
+    @apply btn bg-secondary text-white hover:opacity-90 shadow-bold-blue;
+  }
+  .btn-ghost {
+    @apply btn bg-transparent border-2 border-border text-ink hover:bg-surface-2;
+  }
+  .btn-danger {
+    @apply btn bg-danger text-white hover:opacity-90;
+  }
+  .input {
+    @apply w-full bg-surface-2 border-2 border-border rounded-btn px-3 py-2.5 text-ink placeholder:text-muted focus:border-primary;
+  }
+  .label {
+    @apply block text-sm font-semibold text-ink mb-1.5 uppercase tracking-wide;
+  }
+}
+
+@keyframes pop {
+  0% { transform: scale(0.8); opacity: 0; }
+  60% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.animate-pop { animation: pop 0.3s ease-out; }

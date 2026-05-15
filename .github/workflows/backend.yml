@@ -1,0 +1,66 @@
+# Backend CI/CD — runs Django tests and deploys to Railway.
+#
+# Triggered on pushes to `main` that touch anything under `be/`.
+#
+# Required GitHub Secrets:
+#   - RAILWAY_TOKEN     Create at: Railway dashboard -> Account Settings -> Tokens.
+#                       Used by the Railway CLI to authenticate `railway up`.
+#
+# Notes:
+#   - DATABASE_URL is injected automatically by Railway at runtime — no GH secret needed.
+#   - Tests run against SQLite (in-memory) via the DATABASE_URL env var below, so no
+#     external DB is required in CI.
+
+name: backend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "be/**"
+      - ".github/workflows/backend.yml"
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: be
+    env:
+      DATABASE_URL: "sqlite:///test.db"
+      DJANGO_SECRET_KEY: "ci-test-secret-not-for-production"
+      DJANGO_DEBUG: "False"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: be/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Django tests
+        run: python manage.py test --verbosity 2
+
+  deploy:
+    name: Deploy to Railway
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: railway up --service backend --detach
+        working-directory: be

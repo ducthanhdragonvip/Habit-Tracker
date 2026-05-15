@@ -1,0 +1,60 @@
+# Frontend CI/CD — builds the Vite app and deploys to Vercel.
+#
+# Triggered on pushes to `main` that touch anything under `fe/`.
+#
+# Required GitHub Secrets:
+#   - VERCEL_TOKEN       Create at: Vercel dashboard -> Settings -> Tokens.
+#   - VERCEL_ORG_ID      From `.vercel/project.json` after running `vercel link` locally.
+#   - VERCEL_PROJECT_ID  From `.vercel/project.json` after running `vercel link` locally.
+#
+# Required Vercel Environment Variable (configured in the Vercel project, not GH):
+#   - VITE_API_BASE_URL  The public Railway URL of the deployed backend, e.g.
+#                        https://habit-tracker-backend.up.railway.app
+
+name: frontend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "fe/**"
+      - ".github/workflows/frontend.yml"
+
+jobs:
+  build-and-deploy:
+    name: Build and deploy
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: fe
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: fe/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+
+      - name: Pull Vercel environment
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build for Vercel
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to Vercel
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}

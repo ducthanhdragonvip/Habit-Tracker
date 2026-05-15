@@ -1,0 +1,40 @@
+# Local development stack for Habit Tracker.
+# Usage: `docker compose up -d` from the project root.
+#
+# Services:
+#   - db:      PostgreSQL 16 (Alpine), used by the Django backend
+#   - adminer: Lightweight web UI for inspecting the DB at http://localhost:8080
+#
+# Matching DATABASE_URL for the Django backend:
+#   postgres://habit:habit@localhost:5432/habittracker
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: habit-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: habittracker
+      POSTGRES_USER: habit
+      POSTGRES_PASSWORD: habit
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U habit -d habittracker"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  adminer:
+    image: adminer
+    container_name: habit-adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+
+volumes:
+  pgdata:
